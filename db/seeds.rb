@@ -5,3 +5,8 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
+Todo.create([
+    { title: "Sweep the floor", completed: true },
+    { title: "Learn AJAX", completed: false },
+    { title: "Meditate", completed: false }
+])
