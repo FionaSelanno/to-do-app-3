@@ -42,6 +42,35 @@ function createTodo(title) {
   $("#todolist").append( listItem );
 
   updateCounters();
+
+  var newTodo = { title: title, completed: false };
+
+  $.ajax({
+    type: "POST",
+    url: "/todos.json",
+    data: JSON.stringify({
+        todo: newTodo
+    }),
+    contentType: "application/json",
+    dataType: "json"
+
+    .fail(function(error) {
+    console.log(error);
+
+    error_messsage = error.responseJSON.title[0];
+     showError(error_messsage);
+  });
+}
+
+function showError(message) {
+  $("#todo_title").addClass("error");
+
+  var errorElement = $("<small></small>")
+    .attr('id', 'error_message')
+    .addClass('error')
+    .html(message);
+
+  $(errorElement).appendTo('form .field');
 }
 
 function submitTodo(event) {
