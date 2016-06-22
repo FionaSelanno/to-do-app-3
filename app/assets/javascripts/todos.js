@@ -13,39 +13,69 @@ function updateCounters() {
   $("#todo-count").html($(".todo").length - $(".completed").length);
 }
 
-function nextTodoId() {
-  return $(".todo").length + 1;
-}
-
 function createTodo(title) {
-  var checkboxId = "todo-" + nextTodoId();
+  var newTodo = { title: title, completed: false };
 
-  var listItem = $("<li></li>");
-  listItem.addClass("todo");
+  $.ajax({
+    type: "POST",
+    url: "/todos.json",
+    data: JSON.stringify({
+        todo: newTodo
+    }),
+    contentType: "application/json",
+    dataType: "json"})
 
-  var checkbox = $('<input>');
-  checkbox.attr('type', 'checkbox');
-  checkbox.attr('id', checkboxId);
-  checkbox.val(1);
-  checkbox.bind('change', toggleDone);
+    .done(function(data) {
+      console.log(data);
 
-  var space = document.createTextNode(" ");
+      var checkboxId = "todo-" + data.id;
 
-  var label = $('<label></label>');
-  label.attr('for', checkboxId);
-  label.html(title);
+      var listItem = $("<li></li>");
+      listItem.addClass("todo");
+      listItem.attr('data-id', data.id);
 
-  listItem.append(checkbox);
-  listItem.append(space);
-  listItem.append(label);
+      var checkbox = $('<input>');
+      checkbox.attr('type', 'checkbox');
+      checkbox.attr('id', checkboxId);
+      checkbox.val(1);
+      checkbox.bind('change', toggleDone);
 
-  $("#todolist").append( listItem );
+      var space = document.createTextNode(" ");
 
-  updateCounters();
+      var label = $('<label></label>');
+      label.attr('for', checkboxId);
+      label.html(data.title);
+
+      listItem.append(checkbox);
+      listItem.append(space);
+      listItem.append(label);
+
+      $("#todolist").append( listItem );
+
+      updateCounters();
+    })
+
+    .fail(function(error) {
+      console.log(error);
+
+      error_messsage = error.responseJSON.title[0];
+      showError(error_messsage);
+    });
+}
+function showError(message) {
+  $("#todo_title").addClass("error");
+
+  var errorElement = $("<small></small>")
+    .attr('id', 'error_message')
+    .addClass('error')
+    .html(message);
+
+  $(errorElement).appendTo('form .field');
 }
 
 function submitTodo(event) {
   event.preventDefault();
+  resetErrors();
   createTodo($("#todo_title").val());
   $("#todo_title").val(null);
   updateCounters();
@@ -55,6 +85,11 @@ function cleanUpDoneTodos(event) {
   event.preventDefault();
   $.when($(".completed").remove())
     .then(updateCounters);
+}
+
+function resetErrors() {
+  $("#error_message").remove();
+  $("#todo_title").removeClass("error");
 }
 
 $(document).ready(function() {
